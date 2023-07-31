@@ -147,10 +147,14 @@ class Predictor(object):
         return predicted_value
 
 # Define the function to parse mutants
-def parse_mutant(wt_sequence_str, mutant_str):
+def parse_mutant(wt_sequence_str, mutant_str,sep='_'):
     mutable_seq = MutableSeq(wt_sequence_str)
+    print(f'Parsing mut {mutant_str}')
 
-    for mut in mutant_str.split('_'):
+    if mutant_str == 'WT':
+        return str(mutable_seq)
+
+    for mut in mutant_str.split(sep):
         if mut[0].isdigit():
             position = int(mut[0:-1])
         else:
@@ -167,6 +171,7 @@ def main():
     parser.add_argument('-s','--substrate', type=str, required=True, help='Input substrate in SMILES format.')
     parser.add_argument('-m','--mutant_table', type=str, help='Input mutant table in text or CSV format.')
     parser.add_argument('--mutant_column', type=str, default='best_leaf', help='Name of the mutant column in the CSV file (default: best_leaf).')
+    parser.add_argument('--mutant_sep', type=str, default='_', help="Seperator of mutant. default: '_'. L89A_T125Y")
     parser.add_argument('-o', '--output', type=str, default='./output/output.tsv', help='Output path and filename for saving prediction results (default: ./output/output.tsv).')
     args = parser.parse_args()
 
@@ -174,6 +179,7 @@ def main():
     substrate_smiles = args.substrate
     mutant_table = args.mutant_table
     mutant_column = args.mutant_column
+    mutant_sep=args.mutant_sep
 
 
     
@@ -211,7 +217,7 @@ def main():
 
         # Compose the mutant dictionary
         mutants = {wt_id: wt_sequence}
-        mutants.update({mutant_name:parse_mutant(wt_sequence_str=wt_sequence,mutant_str=mutant_name) for mutant_name in mutant_names})
+        mutants.update({mutant_name:parse_mutant(wt_sequence_str=wt_sequence, mutant_str=mutant_name,sep=mutant_sep) for mutant_name in mutant_names})
     else:
 
 
